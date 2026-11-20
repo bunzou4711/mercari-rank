@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="売れてる順" />
+<link rel="icon" href="data:," />
+<title>メルカリ売れてるランキング</title>
+<style>
+  :root{
+    --bg:#141518;
+    --bg2:#1b1d21;
+    --card:#22242a;
+    --card2:#26282f;
+    --line:#3a3d45;
+    --text:#f5f2ec;
+    --muted:#c9c4b8;
+    --faint:#9d988c;
+    --red:#ff4d42;
+    --red-dark:#d92b20;
+    --gold:#f2b63d;
+    --gold-bg:#3a2f14;
+    --green:#3ecf7a;
+    --green-bg:#173325;
+    --blue:#5db4ff;
+    --blue-bg:#17293d;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html{font-size:19px}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;
+    line-height:1.65;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:20px 18px 40px}
+  h1{
+    font-size:2rem;line-height:1.3;margin:10px 0 8px;font-weight:900;letter-spacing:.01em;
+  }
+  .lead{font-size:1.08rem;color:var(--muted);margin:0 0 6px}
+  .lead strong{color:var(--text)}
+  h2{
+    font-size:1.45rem;line-height:1.35;margin:38px 0 6px;font-weight:900;
+    padding-left:14px;border-left:8px solid var(--red);
+  }
+  .h2sub{color:var(--muted);font-size:1rem;margin:0 0 16px;padding-left:22px}
+  /* ranking */
+  .rank-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+  .rank-item{
+    display:flex;gap:16px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 18px;
+  }
+  .rank-item.top{background:var(--card2);border-color:#5a4a1e}
+  .rank-num{
+    flex:0 0 auto;width:58px;height:58px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;font-weight:900;background:#33363e;color:var(--text);
+    border:2px solid var(--line);
+  }
+  .rank-item.top .rank-num{background:var(--gold);color:#1c1605;border-color:var(--gold)}
+  .rank-body{flex:1 1 auto;min-width:0}
+  .rank-name{font-size:1.28rem;font-weight:800;line-height:1.4;margin:0}
+  .rank-price{font-size:1.45rem;font-weight:900;color:var(--gold);margin:2px 0 0;white-space:nowrap}
+  .rank-row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;justify-content:space-between}
+  .badge{
+    display:inline-block;font-size:.88rem;font-weight:800;line-height:1.3;
+    padding:5px 12px;border-radius:999px;vertical-align:middle;
+  }
+  .badge.soldout{background:#3d1a17;color:#ff9d94;border:1px solid #6e2a22}
+  .badge.sold{background:var(--green-bg);color:var(--green);border:1px solid #245c3a}
+  .badge.price{background:var(--blue-bg);color:var(--blue);border:1px solid #2b4d70}
+  .badge.long{background:var(--gold-bg);color:var(--gold);border:1px solid #6b5518}
+  .memo{color:var(--muted);font-size:1rem;margin:6px 0 0}
+  /* buttons grid */
+  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  a.big-btn{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    min-height:72px;padding:16px 20px;border-radius:var(--radius);
+    background:var(--red-dark);color:#fff;text-decoration:none;
+    font-size:1.22rem;font-weight:900;line-height:1.35;
+    border:1px solid #ff6a5e;
+  }
+  a.big-btn:active{filter:brightness(1.2)}
+  a.big-btn .arrow{font-size:1.4rem;flex:0 0 auto}
+  a.big-btn small{display:block;font-size:.92rem;font-weight:700;color:#ffd9d5}
+  /* print categories */
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .cat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .cat-card h3{font-size:1.3rem;margin:0 0 10px;font-weight:900}
+  .cat-card ul{margin:0 0 16px;padding-left:1.3em;font-size:1.05rem;color:var(--muted)}
+  .cat-card li{margin:4px 0}
+  a.mini-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    min-height:60px;padding:12px 16px;border-radius:14px;
+    background:#fff;color:#b91c14;text-decoration:none;
+    font-size:1.08rem;font-weight:900;text-align:center;line-height:1.35;
+  }
+  a.mini-btn:active{background:#ffd9d5}
+  footer{
+    margin-top:44px;padding:20px;border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--bg2);color:var(--muted);font-size:1.02rem;
+  }
+  footer strong{color:var(--text)}
+  @media (max-width:640px){
+    html{font-size:18px}
+    .wrap{padding:16px 14px 36px}
+    h1{font-size:1.75rem}
+    .btn-grid,.cat-grid{grid-template-columns:1fr}
+    .rank-item{padding:16px 14px;gap:12px}
+    .rank-num{width:50px;height:50px;font-size:1.3rem}
+    .rank-price{font-size:1.3rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🏆 メルカリ売れてるランキング</h1>
+  <p class="lead">メルカリで<strong>実際に売れたもの</strong>を、価格が高い順に並べたで。<br>下のボタンからは、いま売れてるものをメルカリで直接見られるわ。</p>
+
+  <h2>売れた実績（フラン調べ・2026年11月時点）</h2>
+  <p class="h2sub">価格が高い順 ／ 14件</p>
+
+  <ol class="rank-list">
+    <li class="rank-item top">
+      <div class="rank-num">1</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">水槽トンネル Lサイズ</p><p class="rank-price">¥6,061</p></div>
+        <p class="memo"><span class="badge soldout">売り切れ</span>　大型水槽向け。単品で一番高い実績や。</p>
+      </div>
+    </li>
+    <li class="rank-item top">
+      <div class="rank-num">2</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">立体多層シェルター（岩の塔）</p><p class="rank-price">¥4,200</p></div>
+        <p class="memo"><span class="badge sold">売れた</span>　塔ものは高めで売れる。セット売りの参考に。</p>
+      </div>
+    </li>
+    <li class="rank-item top">
+      <div class="rank-num">3</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">聖人フィギュア（塗装済み）</p><p class="rank-price">¥3,000〜4,099</p></div>
+        <p class="memo"><span class="badge sold">売れた相場</span>　塗装まですると高めで売れる。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">4</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">木のトンネルシェルター</p><p class="rank-price">¥2,578</p></div>
+        <p class="memo"><span class="badge soldout">売り切れ</span>　木目調の隠れ家。売り切れ実績あり。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">5</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">マリア像 10〜13cm</p><p class="rank-price">¥2,000〜2,500</p></div>
+        <p class="memo"><span class="badge sold">売れた相場</span>　中サイズの定番や。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">6</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">宗教像 6体セット</p><p class="rank-price">¥2,290</p></div>
+        <p class="memo"><span class="badge price">販売中の目安</span>　セット売りの目安価格や。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">7</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">イエス像 ミニ</p><p class="rank-price">¥1,070〜1,499</p></div>
+        <p class="memo"><span class="badge price">販売中の目安</span>　小さめで手に取りやすい価格帯や。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">8</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">エビ用シェルター 12個セット</p><p class="rank-price">¥1,480</p></div>
+        <p class="memo"><span class="badge soldout">売り切れ</span>　まとめ売りで売り切れとる。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">9</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">名前キーホルダー（オーダー）</p><p class="rank-price">¥1,360</p></div>
+        <p class="memo"><span class="badge soldout">売り切れ</span>　オーダー品。売り切れ実績あり。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">10</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">SKADIS小物セット</p><p class="rank-price">¥888〜999</p></div>
+        <p class="memo"><span class="badge soldout">売り切れ</span>　まとめ売りで売り切れとる。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">11</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">車用フック</p><p class="rank-price">¥980</p></div>
+        <p class="memo"><span class="badge long">ロングセラー</span>　長く売れ続けとる定番や。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">12</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">マリア像 小（3〜5cm）</p><p class="rank-price">¥580〜780</p></div>
+        <p class="memo"><span class="badge sold">売れた相場</span>　小さいサイズは安めの相場や。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">13</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">3Dプリント白猫フィギュア</p><p class="rank-price">¥650</p></div>
+        <p class="memo"><span class="badge price">販売中の目安</span>　販売中の目安価格や。</p>
+      </div>
+    </li>
+    <li class="rank-item">
+      <div class="rank-num">14</div>
+      <div class="rank-body">
+        <div class="rank-row"><p class="rank-name">マグネット式ハンコスタンド</p><p class="rank-price">¥430</p></div>
+        <p class="memo"><span class="badge soldout">売り切れ</span>　一番安い実績。小物でもちゃんと売れる。</p>
+      </div>
+    </li>
+  </ol>
+
+  <h2>いま売れてるものをメルカリで見る</h2>
+  <p class="h2sub">ボタンを押すと、メルカリの「売り切れのみ」検索が新しいタブで開くで。</p>
+
+  <div class="btn-grid">
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E6%B0%B4%E6%A7%BD%20%E3%82%B7%E3%82%A7%E3%83%AB%E3%82%BF%E3%83%BC&amp;status=sold_out" target="_blank" rel="noopener"><span>水槽 シェルター<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E6%B0%B4%E6%A7%BD%20%E3%83%88%E3%83%B3%E3%83%8D%E3%83%AB&amp;status=sold_out" target="_blank" rel="noopener"><span>水槽 トンネル<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E3%82%A2%E3%82%AF%E3%82%A2%E3%83%AA%E3%82%A6%E3%83%A0%20%E3%82%AA%E3%83%96%E3%82%B8%E3%82%A7&amp;status=sold_out" target="_blank" rel="noopener"><span>アクアリウム オブジェ<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=3D%E3%83%97%E3%83%AA%E3%83%B3%E3%83%88%20%E3%83%95%E3%82%A3%E3%82%AE%E3%83%A5%E3%82%A2&amp;status=sold_out" target="_blank" rel="noopener"><span>3Dプリント フィギュア<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E8%81%96%E6%AF%8D%E3%83%9E%E3%83%AA%E3%82%A2%20%E5%83%8F&amp;status=sold_out" target="_blank" rel="noopener"><span>聖母マリア 像<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E3%82%A4%E3%82%A8%E3%82%B9%20%E5%83%8F&amp;status=sold_out" target="_blank" rel="noopener"><span>イエス 像<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E7%8C%AB%20%E7%BD%AE%E7%89%A9&amp;status=sold_out" target="_blank" rel="noopener"><span>猫 置物<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=SKADIS&amp;status=sold_out" target="_blank" rel="noopener"><span>SKADIS<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E5%90%8D%E5%89%8D%20%E3%82%AD%E3%83%BC%E3%83%9B%E3%83%AB%E3%83%80%E3%83%BC&amp;status=sold_out" target="_blank" rel="noopener"><span>名前 キーホルダー<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+    <a class="big-btn" href="https://jp.mercari.com/search?keyword=%E3%82%81%E3%81%A0%E3%81%8B&amp;status=sold_out" target="_blank" rel="noopener"><span>めだか<small>売り切れだけ表示</small></span><span class="arrow">›</span></a>
+  </div>
+
+  <h2>プリントで作れる種類（項目別）</h2>
+  <p class="h2sub">文ちゃんがプリントで作れる種類や。各項目のボタンで、メルカリで売れた実物を確認できるで。</p>
+
+  <div class="cat-grid">
+    <div class="cat-card">
+      <h3>🐠 1. 水槽・生き物</h3>
+      <ul><li>シェルター</li><li>トンネル</li><li>隠れ家</li><li>大仏オブジェ</li><li>エビ用シェルター</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=%E6%B0%B4%E6%A7%BD%20%E3%82%B7%E3%82%A7%E3%83%AB%E3%82%BF%E3%83%BC&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（水槽 シェルター）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>🗿 2. フィギュア</h3>
+      <ul><li>猫</li><li>聖人（マリア・イエス）</li><li>ギリシャ彫刻</li><li>ゴリラ</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=3D%E3%83%97%E3%83%AA%E3%83%B3%E3%83%88%20%E3%83%95%E3%82%A3%E3%82%AE%E3%83%A5%E3%82%A2&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（3Dプリント フィギュア）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>🐟 3. めだか用品</h3>
+      <ul><li>産卵床</li><li>ミジンコ繁殖器</li><li>ゾウリムシ分離器</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=%E3%82%81%E3%81%A0%E3%81%8B&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（めだか）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>🧰 4. 収納・小物</h3>
+      <ul><li>SKADISフック</li><li>ケーブルクリップ</li><li>名前キーホルダー</li><li>小物ケース</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=SKADIS&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（SKADIS）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>📱 5. スタンド類</h3>
+      <ul><li>スマホスタンド</li><li>タブレットスタンド</li><li>ペン立て</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=%E3%82%B9%E3%83%9E%E3%83%9B%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%89%20%E3%83%8F%E3%83%B3%E3%83%89%E3%83%A1%E3%82%A4%E3%83%89&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（スマホスタンド）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>☕ 6. コーヒー用品</h3>
+      <ul><li>豆皿</li><li>ドリッパースタンド</li><li>コースター</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=%E3%83%89%E3%83%AA%E3%83%83%E3%83%91%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%89&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（ドリッパースタンド）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>🎣 7. 釣り用品</h3>
+      <ul><li>仕掛け巻き</li><li>フックカバー</li><li>ロッドホルダー</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=%E9%87%A3%E3%82%8A%20%E4%BB%95%E6%8E%9B%E3%81%91%E5%B7%BB%E3%81%8D&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（釣り 仕掛け巻き）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>🎨 8. 塗装・作業道具</h3>
+      <ul><li>塗装クリップ台</li><li>筆立て</li><li>エアブラシ用品</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=%E5%A1%97%E8%A3%85%E3%82%AF%E3%83%AA%E3%83%83%E3%83%97&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（塗装クリップ）›</a>
+    </div>
+    <div class="cat-card">
+      <h3>🚗 9. 車用品</h3>
+      <ul><li>車用フック</li><li>缶ホルダー</li></ul>
+      <a class="mini-btn" href="https://jp.mercari.com/search?keyword=%E8%BB%8A%20%E3%83%95%E3%83%83%E3%82%AF&amp;status=sold_out" target="_blank" rel="noopener">売れた実物を見る（車 フック）›</a>
+    </div>
+  </div>
+
+  <footer>
+    <strong>注意書き：</strong>実績はフランが調べた時点のものです。最新はボタンからメルカリで確認してください。
+  </footer>
+
+</div>
+</body>
+</html>
